@@ -25,7 +25,7 @@ class RobotServer(object):
         seconds = request.query.get('time', [None])[0]
         if not seconds:
             seconds = 0.1
-        await self.robot.run_sprayer(seconds=seconds)
+        await self.robot.run_sprayer(seconds=float(seconds))
         return aiohttp.web.json_response({'success': True})
 
     async def rest_cancel(self, request):
