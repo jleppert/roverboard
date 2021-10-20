@@ -77,7 +77,11 @@ class RobotMove(object):
         write_socket = write_socket or self.ctrl_writer
         print("send command ", command)
         write_socket.write((command + ';').encode("utf8"))
-        result = await read_socket.read(1024)
+        try:
+            result = await asyncio.wait_for(read_socket.read(1024), timeout=3.0)
+        except asyncio.TimeoutError:
+            print('timeout!')
+            return None
         print(result)
         return result.decode().strip()
 
@@ -179,7 +183,7 @@ class RobotMove(object):
         " Main method for scanning square pattern"
         try:
             async with self.start_lock:
-                
+
 
                 await self.send_command("command")
                 await self.send_command("chassis push freq 10")
