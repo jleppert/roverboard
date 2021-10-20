@@ -23,7 +23,7 @@ class RobotMove(object):
     #
     #     push_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     #     self.event_socket.connect((self.robot_ip, 40925))
-    robot_ip = "127.0.0.1"
+    robot_ip = host
     x = 0
     y = 0
     z = 0
