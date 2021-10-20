@@ -16,10 +16,17 @@ class RobotServer(object):
         await self.robot.connect()
 
     async def rest_start(self, request):
-
+        print(request.query)
         await self.robot.start()
         data = self.robot.to_dict()
         return aiohttp.web.json_response(data)
+
+    async def rest_sprayer(self):
+        seconds = request.query.get('time', None)
+        if not seconds:
+            seconds = 0.1
+        await self.robot.run_sprayer(seconds=seconds)
+        return aiohttp.web.json_response({'success': True})
 
     async def rest_cancel(self, request):
 
@@ -39,7 +46,7 @@ class RobotServer(object):
             aiohttp.web.get('/status', self.rest_status),
             aiohttp.web.get('/start', self.rest_start),
             aiohttp.web.get('/cancel', self.rest_cancel),
-
+            aiohttp.web.get('/sprayer', self.rest_sprayer),
             ])
 
         self.http_runner = aiohttp.web.AppRunner(self.http_app)

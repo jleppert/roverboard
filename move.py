@@ -6,6 +6,10 @@ import sys
 import asyncio
 import os
 from simple_pid import PID
+
+import RPi.GPIO as GPIO
+import time
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,15 +18,9 @@ logger = logging.getLogger(__name__)
 host = os.environ.get("djihost", "127.0.0.1")
 
 
+
 class RobotMove(object):
-    # def __init__(self):
-    #     address = (host, int(port))
-    #
-    #     self.ctrl_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #     self.ctrl_socket.connect(host, 40923)
-    #
-    #     push_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    #     self.event_socket.connect((self.robot_ip, 40925))
+
     robot_ip = host
     x = 0
     y = 0
@@ -32,10 +30,15 @@ class RobotMove(object):
     y_rel = 0
     z_rel = 0
 
+    #gpio config
+    sprayer_output_pin = 13
+
+
     def __init__(self):
         """ Each robot move class can only have one running start task"""
         self.start_lock = asyncio.Lock()
         self.start_coro = None
+        self.setup_gpio()
 
 
     def to_dict(self):
@@ -43,6 +46,22 @@ class RobotMove(object):
                 "is_running": self.start_lock.locked()}
 
         return data
+
+    def setup_gpio(self):
+        GPIO.setmode(GPIO.BOARD)  # BCM pin-numbering scheme from Raspberry Pi
+        # set pin as an output pin with optional initial state of HIGH
+        GPIO.setup(output_pin, GPIO.OUT, initial=GPIO.LOW)
+
+    async def run_sprayer(seconds=.1):
+        try:
+            GPIO.output(output_pin, GPIO.HIGH)
+            await asyncio.sleep(seconds)
+            GPIO.output(output_pin,GPIO.LOW)
+        except Exception as e:
+            logger.exception("GPIO failed")
+        finally:
+            GPIO.output(output_pin, GPIO.LOW)
+
 
     async def connect(self):
 
@@ -188,51 +207,6 @@ class RobotMove(object):
         except Exception as e:
             logger.exception("failed to stop task")
 
-    async def scan_square_legacy(self):
-        for i in range(6):
-            await self.send_command("chassis attitude ?")
-            await self.send_command("chassis position ?")
-            await self.send_command("chassis speed x 0.2")
-            await asyncio.sleep(5.2)
-            await self.send_command("chassis speed x 0")
-            #await self._run_correction(read_socket=self.ctrl_reader, write_socket=self.ctrl_writer)
-
-            await self.send_command("chassis speed y 0.1")
-            await asyncio.sleep(1)
-            await self.send_command("chassis speed y 0")
-            await self.send_command("chassis speed x -0.2")
-            await asyncio.sleep(5.2)
-            await self.send_command("chassis speed x 0")
-            await self.send_command("chassis speed y 0.1")
-            await asyncio.sleep(1)
-            await self.send_command("chassis speed y 0")
-            await self.send_command("chassis attitude ?")
-            await self.send_command("chassis position ?")
-            #await self._run_correction(read_socket=self.ctrl_reader, write_socket=self.ctrl_writer)
-
-
-
-    async def start_legacy(self):
-        await self.connect()
-        task = asyncio.ensure_future(self.read_events())
-        #task = asyncio.ensure_future(self.read_position_loop())
-        await self.send_command("command")
-        await self.send_command("chassis push freq 10")
-        await self._get_position(read_socket=self.ctrl_reader, write_socket=self.ctrl_writer)
-
-
-        # first scan
-        await self.scan_square_legacy()
-        # rotate 90 degrees and scan the perpandicular square
-        await self.send_command("chassis speed z -30")
-        await asyncio.sleep(3)
-        await self.send_command("chassis speed z 0")
-
-        await self.scan_square_legacy()
-
-    async def main(self):
-        await self.connect()
-        await self.start()
 
 
 if __name__ == '__main__':
@@ -240,51 +214,3 @@ if __name__ == '__main__':
     Move = RobotMove()
 
     asyncio.get_event_loop().run_until_complete(Move.main())
-
-# def main():
-#
-#         address = (host, int(port))
-#         push_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-#
-#
-#         # Establish a TCP connection with the control command port of the robot.
-#         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#
-#         print("Connecting...")
-#
-#         s.connect(address)
-#
-#         print("Connected!")
-#
-#         while True:
-#
-#                 # Wait for the user to enter control commands.
-#                 msg = input(">>> please input SDK cmd: ")
-#
-#                 # When the user enters Q or q, exit the current program.
-#                 if msg.upper() == 'Q':
-#                         break
-#
-#                 # Add the ending character.
-#                 msg += ';'
-#
-#                 # Send control commands to the robot.
-#                 s.send(msg.encode('utf-8'))
-#
-#                 try:
-#                         # Wait for the robot to return the execution result.
-#                         buf = s.recv(1024)
-#
-#                         print(buf.decode('utf-8'))
-#                 except socket.error as e:
-#                         print("Error receiving :", e)
-#                         sys.exit(1)
-#                 if not len(buf):
-#                         break
-#
-#         # Disconnect the port connection.
-#         s.shutdown(socket.SHUT_WR)
-#         s.close()
-#
-# if __name__ == '__main__':
-#         main()
