@@ -4,14 +4,14 @@
 import socket
 import sys
 import asyncio
-
+import os
 from simple_pid import PID
 import logging
 
 logger = logging.getLogger(__name__)
 
 # In direct connection mode, the default IP address of the robot is 192.168.2.1 and the control command port is port 40923.
-host = "127.0.0.1"
+host = os.environ.get("djihost", "127.0.0.1")
 
 
 class RobotMove(object):
