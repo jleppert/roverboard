@@ -17,7 +17,7 @@ class RobotServer(object):
 
     async def rest_start(self, request):
         print(request.query)
-        distance = request.query.get('distance', [None])[0]
+        distance = request.query.get('distance')
         if not distance:
             distance = 1
         await self.robot.start(float(distance))
@@ -25,7 +25,7 @@ class RobotServer(object):
         return aiohttp.web.json_response(data)
 
     async def rest_sprayer(self, request):
-        seconds = request.query.get('time', [None])[0]
+        seconds = request.query.get('time')
         if not seconds:
             seconds = 0.1
         await self.robot.run_sprayer(seconds=float(seconds))
