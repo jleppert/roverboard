@@ -156,7 +156,7 @@ class RobotMove(object):
             await self.send_command("chassis speed z 0")
             self.z_rel += z
 
-    async def scan_square(self, distance=1):
+    async def scan_square(self, distance):
         for i in range(6):
             await self.send_command("chassis attitude ?")
             await self.send_command("chassis position ?")
@@ -175,7 +175,7 @@ class RobotMove(object):
             await self.send_command("chassis position ?")
             #await self._run_correction(read_socket=self.ctrl_reader, write_socket=self.ctrl_writer)
 
-    async def _start(self, distance = 1):
+    async def _start(self, distance):
         " Main method for scanning square pattern"
         try:
             async with self.start_lock:
@@ -194,6 +194,7 @@ class RobotMove(object):
             logger.exception("error in _start")
 
     async def start(self, distance=1):
+        print("called start with distance = {}".format(distance))
         if self.start_coro is not None:
             try:
                 self.start_coro.cancel()
