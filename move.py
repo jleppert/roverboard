@@ -175,18 +175,21 @@ class RobotMove(object):
 
     async def _start(self):
         " Main method for scanning square pattern"
-        async with self.start_lock:
+        try:
+            async with self.start_lock:
 
-            await self.send_command("command")
-            await self.send_command("chassis push freq 10")
-            await self._get_position(read_socket=self.ctrl_reader, write_socket=self.ctrl_writer)
+                await self.send_command("command")
+                await self.send_command("chassis push freq 10")
+                await self._get_position(read_socket=self.ctrl_reader, write_socket=self.ctrl_writer)
 
 
-            # first scan
-            await self.scan_square()
-            # rotate 90 degrees and scan the perpandicular square
-            await self.move(x=0,y=0, z=-90, z_speed=30)
-            await self.scan_square()
+                # first scan
+                await self.scan_square()
+                # rotate 90 degrees and scan the perpandicular square
+                await self.move(x=0,y=0, z=-90, z_speed=30)
+                await self.scan_square()
+        except Exception as e:
+            logger.exception("error in _start")
 
     async def start(self):
         if self.start_coro is not None:
