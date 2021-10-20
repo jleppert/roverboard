@@ -50,7 +50,7 @@ class RobotMove(object):
     def setup_gpio(self):
         GPIO.setmode(GPIO.BOARD)  # BCM pin-numbering scheme from Raspberry Pi
         # set pin as an output pin with optional initial state of HIGH
-        GPIO.setup(output_pin, GPIO.OUT, initial=GPIO.LOW)
+        GPIO.setup(self.sprayer_output_pin, GPIO.OUT, initial=GPIO.LOW)
 
     async def run_sprayer(seconds=.1):
         try:
