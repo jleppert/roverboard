@@ -22,7 +22,7 @@ class RobotServer(object):
         return aiohttp.web.json_response(data)
 
     async def rest_sprayer(self, request):
-        seconds = request.query.get('time', None)
+        seconds = request.query.get('time', [None])[0]
         if not seconds:
             seconds = 0.1
         await self.robot.run_sprayer(seconds=seconds)
