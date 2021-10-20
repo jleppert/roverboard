@@ -17,7 +17,10 @@ class RobotServer(object):
 
     async def rest_start(self, request):
         print(request.query)
-        await self.robot.start()
+        distance = request.query.get('distance', [None])[0]
+        if not distance:
+            distance = 1
+        await self.robot.start(distance)
         data = self.robot.to_dict()
         return aiohttp.web.json_response(data)
 

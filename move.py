@@ -156,24 +156,26 @@ class RobotMove(object):
             await self.send_command("chassis speed z 0")
             self.z_rel += z
 
-    async def scan_square(self):
+    async def scan_square(self, distance=1):
         for i in range(6):
             await self.send_command("chassis attitude ?")
             await self.send_command("chassis position ?")
 
-            await self.move(x=1.05, speed=0.2)
-            await self.move(y=0.1, speed=0.1)
 
-            await self.move(x=-1.05, speed=0.2)
 
-            await self.move(y=0.1, speed=0.1)
+            await self.move(x=1.05 * distance, speed=0.2)
+            await self.move(y=0.1 * distance, speed=0.1)
+
+            await self.move(x=-1.05 * distance, speed=0.2)
+
+            await self.move(y=0.1 * distance, speed=0.1)
 
 
             await self.send_command("chassis attitude ?")
             await self.send_command("chassis position ?")
             #await self._run_correction(read_socket=self.ctrl_reader, write_socket=self.ctrl_writer)
 
-    async def _start(self):
+    async def _start(self, distance = 1):
         " Main method for scanning square pattern"
         try:
             async with self.start_lock:
@@ -184,21 +186,21 @@ class RobotMove(object):
 
 
                 # first scan
-                await self.scan_square()
+                await self.scan_square(distance=distance)
                 # rotate 90 degrees and scan the perpandicular square
                 await self.move(x=0,y=0, z=-90, z_speed=30)
-                await self.scan_square()
+                await self.scan_square(distance=distance)
         except Exception as e:
             logger.exception("error in _start")
 
-    async def start(self):
+    async def start(self, distance=1):
         if self.start_coro is not None:
             try:
                 self.start_coro.cancel()
                 await self.start_coro
             except Exception as e:
                 logger.exception("failed to stop task")
-        self.start_coro = asyncio.ensure_future(self._start())
+        self.start_coro = asyncio.ensure_future(self._start(distance=distance))
 
 
     async def cancel(self):
