@@ -66,10 +66,25 @@ class RobotServer(object):
         finally:
             await self.http_runner.cleanup()
 
+
+
     def main(self):
         asyncio.set_event_loop(asyncio.new_event_loop())
 
         loop = asyncio.get_event_loop()
+
+
+        # Setup exception handler
+
+        def exception_handler(loop, context):
+            logger.error("unhandled exception in %s: %s",
+                context['future'] if 'future' in context else '<none>',
+                context['message'],
+                exc_info=context['exception']
+                    if 'exception' in context else False)
+            loop.stop()
+        loop.set_exception_handler(exception_handler)
+
         return loop.run_until_complete(self.http_server())
 
 
