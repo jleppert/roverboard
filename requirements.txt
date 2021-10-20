@@ -1,0 +1,2 @@
+simple-pid
+aiohttp==3.5.4
