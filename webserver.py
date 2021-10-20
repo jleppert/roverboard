@@ -25,6 +25,8 @@ class RobotServer(object):
         return aiohttp.web.json_response(data)
 
     async def rest_video(self, request):
+        await self.robot.send_command("command")
+        await self.robot.send_command("stream off")
         await self.robot.send_command("stream on")
         return aiohttp.web.json_response({'success': True})
 
