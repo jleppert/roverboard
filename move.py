@@ -54,13 +54,13 @@ class RobotMove(object):
 
     async def run_sprayer(self, seconds=.1):
         try:
-            GPIO.output(output_pin, GPIO.HIGH)
+            GPIO.output(self.sprayer_output_pin, GPIO.HIGH)
             await asyncio.sleep(seconds)
-            GPIO.output(output_pin,GPIO.LOW)
+            GPIO.output(self.sprayer_output_pin,GPIO.LOW)
         except Exception as e:
             logger.exception("GPIO failed")
         finally:
-            GPIO.output(output_pin, GPIO.LOW)
+            GPIO.output(self.sprayer_output_pin, GPIO.LOW)
 
 
     async def connect(self):
