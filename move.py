@@ -52,7 +52,7 @@ class RobotMove(object):
         # set pin as an output pin with optional initial state of HIGH
         GPIO.setup(self.sprayer_output_pin, GPIO.OUT, initial=GPIO.LOW)
 
-    async def run_sprayer(seconds=.1):
+    async def run_sprayer(self, seconds=.1):
         try:
             GPIO.output(output_pin, GPIO.HIGH)
             await asyncio.sleep(seconds)
