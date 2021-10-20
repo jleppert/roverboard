@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class RobotServer(object):
     http_port = 9005
-    http_address='127.0.0.1'
+    http_address='0.0.0.0'
 
     async def setup(self):
         """ runs any on-startup initialization"""
