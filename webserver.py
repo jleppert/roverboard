@@ -24,6 +24,10 @@ class RobotServer(object):
         data = self.robot.to_dict()
         return aiohttp.web.json_response(data)
 
+    async def rest_video(self, request):
+        await self.robot.send_command("stream on")
+        return aiohttp.web.json_response({'success': True})
+
     async def rest_sprayer(self, request):
         seconds = request.query.get('time')
         if not seconds:
@@ -50,6 +54,7 @@ class RobotServer(object):
             aiohttp.web.get('/start', self.rest_start),
             aiohttp.web.get('/cancel', self.rest_cancel),
             aiohttp.web.get('/sprayer', self.rest_sprayer),
+            aiohttp.web.get('/video_on', self.rest_video),
             ])
 
         self.http_runner = aiohttp.web.AppRunner(self.http_app)
