@@ -179,9 +179,11 @@ class RobotMove(object):
         " Main method for scanning square pattern"
         try:
             async with self.start_lock:
+                
 
                 await self.send_command("command")
                 await self.send_command("chassis push freq 10")
+                await self.send_command("stream on")
                 await self._get_position(read_socket=self.ctrl_reader, write_socket=self.ctrl_writer)
 
 
