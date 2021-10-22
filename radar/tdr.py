@@ -47,10 +47,15 @@ class TDR():
         """ for CSV files"""
 
         df = pd.read_csv(file,header=None,names=['freq','real','imag'])
+        try:
+            self.re= df['real'].to_numpy()
+            self.im= df['imag'].to_numpy()
+            self.freq=df['freq'].to_numpy()
+        except:
+            self.re= np.array(df['real'])
+            self.im= np.array(df['imag'])
+            self.freq= np.array(df['freq'])
 
-        self.re= df['real'].to_numpy()
-        self.im= df['imag'].to_numpy()
-        self.freq=df['freq'].to_numpy()
 
         self.calcTDR()
 
