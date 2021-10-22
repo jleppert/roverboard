@@ -100,6 +100,8 @@ def main():
     parser.add_argument("-o", "--output", type=str,
                     help="ouput file name for DZT, .DZT will be added")
 
+    parser.add_argument("-t", "--time", type=int, default=None,
+                    help="time to write data")
 
     args = parser.parse_args()
     output = args.output
@@ -107,7 +109,7 @@ def main():
 
     GPR.run()
     try:
-        GPR.writedata(args.output)
+        GPR.writedata(args.output, args.time)
     except KeyboardInterrupt:
         print("stopping data collection, running pipeline")
         tdr = TDR(use_csv=True)
