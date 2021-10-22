@@ -138,7 +138,7 @@ class RobotMove(object):
         try:
             tdr = TDR(use_csv=True)
             d = "data/{}".format(name)
-            tdr.listFolder(d,d)
+            tdr.listFolder(d + '/', d)
         except:
             logger.exception("Failed post proccessing job ")
             import pdb; pdb.set_trace()
