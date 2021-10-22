@@ -40,7 +40,7 @@ class VNAGPR(object):
         print("Setting up the sweep...")
         vna.cmd(":DEV:MODE VNA")
         vna.cmd(":VNA_CAL:LOAD {}".format(self.calibration))
-        vna.cmd(":VNA_CAL:TYPE SOLT"
+        vna.cmd(":VNA_CAL:TYPE SOLT")
         vna.cmd(":VNA:SWEEP FREQUENCY")
         vna.cmd(":VNA:STIM:LVL 0")
         vna.cmd(":VNA:ACQ:IFBW 5000")
