@@ -15,6 +15,10 @@ import logging
 from radar.sweep import VNAGPR
 import datetime
 
+from concurrent.futures import ProcessPoolExecutor
+
+
+
 logger = logging.getLogger(__name__)
 
 # In direct connection mode, the default IP address of the robot is 192.168.2.1 and the control command port is port 40923.
@@ -23,6 +27,7 @@ host = os.environ.get("djihost", "127.0.0.1")
 
 
 class RobotMove(object):
+    process_executor = ProcessPoolExecutor(max_workers=1)
 
     robot_ip = host
     x = 0
@@ -127,6 +132,7 @@ class RobotMove(object):
             print("position loop", position)
             await asyncio.sleep(5)
 
+
     async def record_gpr(self, seconds):
         """ starts processing GPR for specified number of seconds in another thread, returns before complete"""
         loop = asyncio.get_event_loop()
@@ -134,8 +140,19 @@ class RobotMove(object):
         gpr = VNAGPR()
         gpr.run()
         name = datetime.datetime.utcnow().isoformat()
-        task = loop.run_in_executor(None, gpr.writedata, name, seconds)
+
+        def write_tdr():
+            tdr = TDR(use_csv=True)
+            tdr.listFolder("data/{}".format(name))
+
+        def writedata():
+            gpr.writedata(name,seconds)
+            loop.run_in_executor(self.process_executor, write_tdr)
+
+        task = loop.run_in_executor(None, writedata)
         return task
+
+    async def
 
 
     async def move(self, x=0, y=0, speed = 0.2, z=0, z_speed=30, record_gpr=False):
@@ -153,6 +170,7 @@ class RobotMove(object):
             await self.send_command("chassis speed x {}".format(speed))
             await asyncio.sleep(t)
             await self.send_command("chassis speed x 0 ")
+            loop.run_in_executor(self.process_executor, )
             if record_gpr:
                 await gpr_task
             # todo track movement in real time as rover is moving in a single command
