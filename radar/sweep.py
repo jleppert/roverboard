@@ -3,10 +3,10 @@ import argparse
 
 import time
 import csv
-from libreVNA import libreVNA
+from .libreVNA import libreVNA
 import datetime
 import os
-from tdr import TDR
+from .tdr import TDR
 
 
 # run with

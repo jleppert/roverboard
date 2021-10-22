@@ -105,6 +105,7 @@ class RobotMove(object):
                 self.start_z = self.z
 
         except Exception as e:
+            return
             import pdb; pdb.set_trace()
 
     async def _run_correction(self, read_socket, write_socket):
