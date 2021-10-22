@@ -135,8 +135,12 @@ class RobotMove(object):
 
     @staticmethod
     def write_tdr(name):
-        tdr = TDR(use_csv=True)
-        tdr.listFolder("data/{}".format(name))
+        try:
+            tdr = TDR(use_csv=True)
+            d = "data/{}".format(name)
+            tdr.listFolder(d,d)
+        except:
+            logger.exception("Failed post proccessing job ")
 
     async def record_gpr(self, seconds):
         """ starts processing GPR for specified number of seconds in another thread, returns before complete"""
