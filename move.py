@@ -209,7 +209,6 @@ class RobotMove(object):
 
                 #This is the full Scan of the square
                 if pattern == "square":
-
                     # first scan
                     await self.scan_square(distance=distance)
                     # rotate 90 degrees and scan the perpandicular square
@@ -219,6 +218,8 @@ class RobotMove(object):
                     await self.move(x=1.05 * distance, speed=0.1, record_gpr=record_gpr)
         except Exception as e:
             logger.exception("error in _start")
+        finally:
+            await self.send_command("quit")
 
     async def start(self, distance=1, pattern="square", record_gpr=False):
         print("called start with distance = {}".format(distance))

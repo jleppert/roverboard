@@ -42,7 +42,7 @@ class VNAGPR(object):
         vna.cmd(":VNA_CAL:LOAD {}".format(self.calibration))
         vna.cmd(":VNA:SWEEP FREQUENCY")
         vna.cmd(":VNA:STIM:LVL 0")
-        vna.cmd(":VNA:ACQ:IFBW 10000")
+        vna.cmd(":VNA:ACQ:IFBW 5000")
         vna.cmd(":VNA:ACQ:AVG 1")
         vna.cmd(":VNA:ACQ:POINTS 303")
         vna.cmd(":VNA:AQC 1")
