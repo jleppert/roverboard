@@ -18,13 +18,16 @@ class RobotServer(object):
     async def rest_start(self, request):
         print(request.query)
         distance = request.query.get('distance')
+        pattern = request.query.get('pattern', "square")
+        record_gpr = request.query.get('record_gpr', False)
         if not distance:
             distance = 1
-        await self.robot.start(float(distance))
+        await self.robot.start(float(distance), pattern, record_gpr)
         data = self.robot.to_dict()
         return aiohttp.web.json_response(data)
 
     async def rest_video(self, request):
+
         await self.robot.send_command("command")
         await self.robot.send_command("stream off")
         await self.robot.send_command("stream on")

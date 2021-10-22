@@ -8,6 +8,9 @@ import datetime
 import os
 from tdr import TDR
 
+
+# run with
+# LibreVNA-GUI --no-gui --port 19542
 class VNAGPR(object):
     calibration = os.environ.get('CALIBRATION', '/Users/ian/projects/SOLT 1.00M-3.00G 303pt.cal')
     def __init__(self):

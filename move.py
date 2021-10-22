@@ -12,6 +12,8 @@ import time
 
 import logging
 
+from .radar.sweep import VNAGPR
+
 logger = logging.getLogger(__name__)
 
 # In direct connection mode, the default IP address of the robot is 192.168.2.1 and the control command port is port 40923.
@@ -123,8 +125,18 @@ class RobotMove(object):
             print("position loop", position)
             await asyncio.sleep(5)
 
+    async def record_gpr(seconds):
+        """ starts processing GPR for specified number of seconds in another thread, returns before complete"""
+        loop = asyncio.get_running_loop()
 
-    async def move(self, x=0, y=0, speed = 0.2, z=0, z_speed=30):
+        gpr = VNAGPR()
+        gpr.run()
+        name = datetime.datetime.utcnow().isoformat()
+        task = loop.run_in_executor(None, gpr.writedata, name, seconds)
+        return task
+
+
+    async def move(self, x=0, y=0, speed = 0.2, z=0, z_speed=30, record_gpr=False):
 
         """ impliments move to relative position based on velocity and track position"""
         if x and y:
@@ -134,9 +146,13 @@ class RobotMove(object):
             t = abs(x) / abs(speed)
             if x < 0:
                 speed = -abs(speed)
+            if record_gpr:
+                gpr_task = await self.record_gpr(t)
             await self.send_command("chassis speed x {}".format(speed))
             await asyncio.sleep(t)
             await self.send_command("chassis speed x 0 ")
+            if record_gpr:
+                await gpr_task
             # todo track movement in real time as rover is moving in a single command
             self.x_rel += x
 
@@ -179,7 +195,7 @@ class RobotMove(object):
             await self.send_command("chassis position ?")
             #await self._run_correction(read_socket=self.ctrl_reader, write_socket=self.ctrl_writer)
 
-    async def _start(self, distance):
+    async def _start(self, distance, pattern, record_gpr):
         " Main method for scanning square pattern"
         try:
             async with self.start_lock:
@@ -190,16 +206,21 @@ class RobotMove(object):
                 await self.send_command("stream on")
                 await self._get_position(read_socket=self.ctrl_reader, write_socket=self.ctrl_writer)
 
+                #This is the full Scan of the square
+                if pattern == "square":
 
-                # first scan
-                await self.scan_square(distance=distance)
-                # rotate 90 degrees and scan the perpandicular square
-                await self.move(x=0,y=0, z=-90, z_speed=30)
-                await self.scan_square(distance=distance)
+                    # first scan
+                    await self.scan_square(distance=distance)
+                    # rotate 90 degrees and scan the perpandicular square
+                    await self.move(x=0,y=0, z=-90, z_speed=30)
+                    await self.scan_square(distance=distance)
+                else:
+
+                    await self.move(x=1.05 * distance, speed=0.1, record_gpr=record_gpr)
         except Exception as e:
             logger.exception("error in _start")
 
-    async def start(self, distance=1):
+    async def start(self, distance=1, pattern="square", record_gpr=False):
         print("called start with distance = {}".format(distance))
         if self.start_coro is not None:
             try:
@@ -207,7 +228,8 @@ class RobotMove(object):
                 await self.start_coro
             except Exception as e:
                 logger.exception("failed to stop task")
-        self.start_coro = asyncio.ensure_future(self._start(distance=distance))
+        self.start_coro = asyncio.ensure_future(self._start(distance=distance, pattern=pattern,
+                                                            record_gpr=record_gpr))
 
 
     async def cancel(self):
