@@ -45,7 +45,7 @@ class VNAGPR(object):
         vna.cmd(":VNA:STIM:LVL 0")
         vna.cmd(":VNA:ACQ:IFBW 10000")
         vna.cmd(":VNA:ACQ:AVG 1")
-        vna.cmd(":VNA:ACQ:POINTS 303")
+        vna.cmd(":VNA:ACQ:POINTS 600")
         vna.cmd(":VNA:AQC 1")
         #vna.cmd(":VNA:AQQuisition:AVG 1")
         #vna.cmd(":VNA:FREQuency:SPAN 1")
