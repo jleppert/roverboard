@@ -141,7 +141,7 @@ class RobotMove(object):
             tdr.listFolder(d,d)
         except:
             logger.exception("Failed post proccessing job ")
-
+            import pdb; pdb.set_trace()
     async def record_gpr(self, seconds):
         """ starts processing GPR for specified number of seconds in another thread, returns before complete"""
         loop = asyncio.get_event_loop()
@@ -154,7 +154,8 @@ class RobotMove(object):
 
         def writedata(name, seconds):
             gpr.writedata(name, seconds)
-            self.process_executor.submit(self.write_tdr, name)
+            self.write_tdr(name)
+            #self.process_executor.submit(self.write_tdr, name)
 
         task = loop.run_in_executor(None, writedata, name, seconds)
         return task
