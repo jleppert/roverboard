@@ -132,6 +132,10 @@ class RobotMove(object):
             print("position loop", position)
             await asyncio.sleep(5)
 
+    @staticmethod
+    def write_tdr(name):
+        tdr = TDR(use_csv=True)
+        tdr.listFolder("data/{}".format(name))
 
     async def record_gpr(self, seconds):
         """ starts processing GPR for specified number of seconds in another thread, returns before complete"""
@@ -141,13 +145,11 @@ class RobotMove(object):
         gpr.run()
         name = datetime.datetime.utcnow().isoformat()
 
-        def write_tdr():
-            tdr = TDR(use_csv=True)
-            tdr.listFolder("data/{}".format(name))
+
 
         def writedata():
             gpr.writedata(name,seconds)
-            loop.run_in_executor(self.process_executor, write_tdr)
+            loop.run_in_executor(self.process_executor, self.write_tdr, name)
 
         task = loop.run_in_executor(None, writedata)
         return task
