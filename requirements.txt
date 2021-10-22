@@ -1,2 +1,4 @@
 simple-pid
 aiohttp==3.5.4
+Django==3.2.8
+pandas
