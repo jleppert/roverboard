@@ -147,9 +147,10 @@ class RobotMove(object):
 
 
 
-        def writedata():
-            gpr.writedata(name,seconds)
-            loop.run_in_executor(self.process_executor, self.write_tdr, name)
+        def writedata(name, seconds):
+            gpr.writedata(name, seconds)
+            self.process_executor.submit(self.write_tdr, name)
+            loop.run_in_executor(self.process_executor, write_tdr, name, seconds)
 
         task = loop.run_in_executor(None, writedata)
         return task
