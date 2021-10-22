@@ -127,7 +127,7 @@ class RobotMove(object):
 
     async def record_gpr(self, seconds):
         """ starts processing GPR for specified number of seconds in another thread, returns before complete"""
-        loop = asyncio.get_running_loop()
+        loop = asyncio.get_event_loop()
 
         gpr = VNAGPR()
         gpr.run()
