@@ -43,7 +43,7 @@ class VNAGPR(object):
         vna.cmd(":VNA_CAL:TYPE SOLT")
         vna.cmd(":VNA:SWEEP FREQUENCY")
         vna.cmd(":VNA:STIM:LVL 0")
-        vna.cmd(":VNA:ACQ:IFBW 5000")
+        vna.cmd(":VNA:ACQ:IFBW 10000")
         vna.cmd(":VNA:ACQ:AVG 1")
         vna.cmd(":VNA:ACQ:POINTS 303")
         vna.cmd(":VNA:AQC 1")
@@ -72,7 +72,8 @@ class VNAGPR(object):
             start = datetime.datetime.utcnow()
             data = self.vna.query(":VNA:TRACE:DATA? S21")
             end = datetime.datetime.utcnow()
-            print("took {} seconds".format((end - start).total_seconds()))
+            total_seconds = (end - start).total_seconds()
+            print("took {} seconds".format(total_seconds))
             S21 = self.vna.parse_trace_data(data)
             print(output)
 
@@ -82,8 +83,9 @@ class VNAGPR(object):
                 for row in S21:
                     freq, real, imag = row[0], row[1].real, row[1].imag
                     writer.writerow((freq,real,imag))
-            time.sleep(0.025)
             time_ran = datetime.datetime.utcnow() - start_time
+            if total_seconds < 0.01:
+                time.sleep(0.025)
             if run_seconds and time_ran.total_seconds() > run_seconds:
                 print("running for {} seconds, stopping capture".format(run_seconds))
                 break
