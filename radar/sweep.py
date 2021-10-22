@@ -6,9 +6,10 @@ import csv
 from libreVNA import libreVNA
 import datetime
 import os
+from tdr import TDR
 
 class VNAGPR(object):
-    calibration = os.environ.get('CALIBRATION', '/Users/ian/projects/1-6g.cal')
+    calibration = os.environ.get('CALIBRATION', '/Users/ian/projects/SOLT 1.00M-3.00G 303pt.cal')
     def __init__(self):
         pass
 
@@ -40,27 +41,29 @@ class VNAGPR(object):
         vna.cmd(":VNA:STIM:LVL 0")
         vna.cmd(":VNA:ACQ:IFBW 10000")
         vna.cmd(":VNA:ACQ:AVG 1")
-        vna.cmd(":VNA:ACQ:POINTS 101")
+        vna.cmd(":VNA:ACQ:POINTS 303")
         vna.cmd(":VNA:AQC 1")
         #vna.cmd(":VNA:AQQuisition:AVG 1")
         #vna.cmd(":VNA:FREQuency:SPAN 1")
-        vna.cmd(":VNA:FREQuency:START 1000000000")
-        vna.cmd(":VNA:FREQuency:STOP 2000000000")
+        vna.cmd(":VNA:FREQuency:START 10000000")
+        vna.cmd(":VNA:FREQuency:STOP 3000000000")
 
         # wait for the sweep to finish
         print("Waiting for the sweep to finish...")
         while vna.query(":VNA:ACQ:FIN?") == "FALSE":
             time.sleep(0.1)
 
-    def writedata(self, output):
+    def writedata(self, output, run_seconds=None):
 
         # grab the data of trace S11
         print("Reading trace data...")
-        directory = 'data/{}'.format(output)
-        if os.path.exists(directory):
+        self.directory = 'data/{}'.format(output)
+        if os.path.exists(self.directory):
             raise Exception("Directory exists")
 
-        os.makedirs(directory)
+        os.makedirs(self.directory)
+        start_time = datetime.datetime.utcnow()
+
         while True:
             start = datetime.datetime.utcnow()
             data = self.vna.query(":VNA:TRACE:DATA? S21")
@@ -69,14 +72,17 @@ class VNAGPR(object):
             S21 = self.vna.parse_trace_data(data)
             print(output)
 
-
-            with open('{}/{}'.format(directory, start.isoformat()),'w') as e:
+            with open('{}/{}'.format(self.directory, start.isoformat()),'w') as e:
                 writer = csv.writer(e)
 
                 for row in S21:
                     freq, real, imag = row[0], row[1].real, row[1].imag
                     writer.writerow((freq,real,imag))
             time.sleep(0.025)
+            time_ran = datetime.datetime.utcnow() - start_time
+            if run_seconds and time_ran.total_seconds() > run_seconds:
+                print("running for {} seconds, stopping capture".format(run_seconds))
+                break
 
     def run(self):
         self.connect()
@@ -97,7 +103,14 @@ def main():
     GPR = VNAGPR()
 
     GPR.run()
-    GPR.writedata(args.output)
+    try:
+        GPR.writedata(args.output)
+    except KeyboardInterrupt:
+        print("stopping data collection, running pipeline")
+        tdr = TDR(use_csv=True)
+        tdr.listFolder(self.directory)
+
+
 
 if __name__=="__main__":
     main()

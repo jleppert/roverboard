@@ -51,6 +51,7 @@ class TDR():
         self.re= df['real'].to_numpy()
         self.im= df['imag'].to_numpy()
         self.freq=df['freq'].to_numpy()
+
         self.calcTDR()
 
 
@@ -228,7 +229,6 @@ def main():
     print('start')
     a = TDR(use_csv=args.csv)
     a.listFolder(input, output)
-    #a.readP2S('/home/johnathan/devel/nanovna-saver/data/11.s2p')
     a.calcTDR()
 
 if __name__ == "__main__":
