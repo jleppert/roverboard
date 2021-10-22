@@ -152,7 +152,6 @@ class RobotMove(object):
         task = loop.run_in_executor(None, writedata)
         return task
 
-    async def
 
 
     async def move(self, x=0, y=0, speed = 0.2, z=0, z_speed=30, record_gpr=False):
