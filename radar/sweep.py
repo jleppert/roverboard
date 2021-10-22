@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 import argparse
-
+import asyncio
+import concurrent.futures
 import time
 import csv
-from .libreVNA import libreVNA
+try:
+    from .libreVNA import libreVNA
+    from .tdr import TDR
+except:
+    from libreVNA import libreVNA
+    from tdr import TDR
+
 import datetime
 import os
-from .tdr import TDR
+
 
 
 # run with
@@ -45,7 +52,7 @@ class VNAGPR(object):
         vna.cmd(":VNA:STIM:LVL 0")
         vna.cmd(":VNA:ACQ:IFBW 10000")
         vna.cmd(":VNA:ACQ:AVG 1")
-        vna.cmd(":VNA:ACQ:POINTS 600")
+        vna.cmd(":VNA:ACQ:POINTS 303")
         vna.cmd(":VNA:AQC 1")
         #vna.cmd(":VNA:AQQuisition:AVG 1")
         #vna.cmd(":VNA:FREQuency:SPAN 1")
@@ -57,6 +64,54 @@ class VNAGPR(object):
         while vna.query(":VNA:ACQ:FIN?") == "FALSE":
             time.sleep(0.1)
 
+    def close(self):
+        return self.vna.sock.close()
+
+    async def writedata_async(self, output, run_seconds=None):
+
+        loop = asyncio.get_event_loop()
+
+        # grab the data of trace S11
+        print("Reading trace data...")
+        self.directory = 'data/{}'.format(output)
+        if os.path.exists(self.directory):
+            raise Exception("Directory exists")
+
+        os.makedirs(self.directory)
+        start_time = datetime.datetime.utcnow()
+
+        tasks = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+
+
+            while True:
+                start = datetime.datetime.utcnow()
+                data = self.vna.query(":VNA:TRACE:DATA? S21")
+                end = datetime.datetime.utcnow()
+                total_seconds = (end - start).total_seconds()
+                print("took {} seconds".format(total_seconds))
+                S21 = self.vna.parse_trace_data(data)
+                print(output)
+
+                def write_file():
+                    with open('{}/{}'.format(self.directory, start.isoformat()),'w') as e:
+                        writer = csv.writer(e)
+
+                        for row in S21:
+                            freq, real, imag = row[0], row[1].real, row[1].imag
+                            writer.writerow((freq,real,imag))
+
+                tasks.append(loop.run_in_executor(executor,write_file))
+
+                time_ran = datetime.datetime.utcnow() - start_time
+                if total_seconds < 0.01:
+                    time.sleep(0.025)
+                if run_seconds and time_ran.total_seconds() > run_seconds:
+                    print("running for {} seconds, stopping capture".format(run_seconds))
+                    break
+            await asyncio.gather(*tasks)
+
+
     def writedata(self, output, run_seconds=None):
 
         # grab the data of trace S11
@@ -67,6 +122,8 @@ class VNAGPR(object):
 
         os.makedirs(self.directory)
         start_time = datetime.datetime.utcnow()
+
+
 
         while True:
             start = datetime.datetime.utcnow()
@@ -84,11 +141,13 @@ class VNAGPR(object):
                     freq, real, imag = row[0], row[1].real, row[1].imag
                     writer.writerow((freq,real,imag))
             time_ran = datetime.datetime.utcnow() - start_time
-            if total_seconds < 0.01:
-                time.sleep(0.025)
+
             if run_seconds and time_ran.total_seconds() > run_seconds:
                 print("running for {} seconds, stopping capture".format(run_seconds))
                 break
+
+            if total_seconds < 0.01:
+                time.sleep(0.025)
 
     def run(self):
         self.connect()
@@ -101,23 +160,38 @@ def main():
     formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument("-o", "--output", type=str,
-                    help="ouput file name for DZT, .DZT will be added")
+                    help="ouput file folder ")
 
     parser.add_argument("-t", "--time", type=int, default=None,
                     help="time to write data")
 
+    parser.add_argument("-a", "--async",  action="store_true",
+                    help="use async file writes")
+
+    parser.add_argument("-p", "--pipeline",  action="store_true",
+                    help="run tdr  pipeline ( only works with time set)")
+
     args = parser.parse_args()
     output = args.output
-    GPR = VNAGPR()
-
-    GPR.run()
     try:
-        GPR.writedata(args.output, args.time)
-    except KeyboardInterrupt:
-        print("stopping data collection, running pipeline")
-        tdr = TDR(use_csv=True)
-        tdr.listFolder(self.directory)
+        GPR = VNAGPR()
 
+        GPR.run()
+
+        if not args.async:
+            print("not using async")
+            GPR.writedata(args.output, args.time)
+        else:
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(GPR.writedata_async(args.output, args.time))
+
+        if args.time and args.pipeline:
+            print("stopping data collection, running pipeline")
+            tdr = TDR(use_csv=True)
+            tdr.listFolder(GPR.directory + '/', GPR.directory +'o')
+    finally:
+        GPR.close()
 
 
 if __name__=="__main__":
