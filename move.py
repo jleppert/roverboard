@@ -12,7 +12,7 @@ import time
 
 import logging
 
-from .radar.sweep import VNAGPR
+from radar.sweep import VNAGPR
 
 logger = logging.getLogger(__name__)
 
@@ -215,7 +215,6 @@ class RobotMove(object):
                     await self.move(x=0,y=0, z=-90, z_speed=30)
                     await self.scan_square(distance=distance)
                 else:
-
                     await self.move(x=1.05 * distance, speed=0.1, record_gpr=record_gpr)
         except Exception as e:
             logger.exception("error in _start")
