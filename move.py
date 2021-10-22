@@ -151,9 +151,8 @@ class RobotMove(object):
         def writedata(name, seconds):
             gpr.writedata(name, seconds)
             self.process_executor.submit(self.write_tdr, name)
-            loop.run_in_executor(self.process_executor, write_tdr, name, seconds)
 
-        task = loop.run_in_executor(None, writedata)
+        task = loop.run_in_executor(None, writedata, name, seconds)
         return task
 
 
@@ -173,7 +172,6 @@ class RobotMove(object):
             await self.send_command("chassis speed x {}".format(speed))
             await asyncio.sleep(t)
             await self.send_command("chassis speed x 0 ")
-            loop.run_in_executor(self.process_executor, )
             if record_gpr:
                 await gpr_task
             # todo track movement in real time as rover is moving in a single command
