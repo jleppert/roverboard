@@ -13,6 +13,7 @@ import time
 import logging
 
 from radar.sweep import VNAGPR
+from radar.tdr import TDR
 import datetime
 
 from concurrent.futures import ProcessPoolExecutor
