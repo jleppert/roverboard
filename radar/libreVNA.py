@@ -19,8 +19,8 @@ class libreVNA:
             raise Exception("Unable to connect to LibreVNA-GUI. Make sure it is running and the TCP server is enabled.")
 
     async def close(self):
-        self.writer.close()
         await self.writer.drain()
+        self.writer.close()
         try:
             await self.writer.wait_closed()
         except:
