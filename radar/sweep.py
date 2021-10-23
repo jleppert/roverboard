@@ -59,8 +59,8 @@ class VNAGPR(object):
         # switch to VNA mode, setup the sweep parameters
         print("Setting up the sweep...")
         await self.vna.cmd(":DEV:MODE VNA")
-        await self.vna.cmd(":VNA_CAL:LOAD {}".format(self.calibration))
-        await self.vna.cmd(":VNA_CAL:TYPE SOLT")
+        await self.vna.cmd(":VNA:CAL:LOAD {}".format(self.calibration))
+        await self.vna.cmd(":VNA:CAL:TYPE SOLT")
         await self.vna.cmd(":VNA:SWEEP FREQUENCY")
         await self.vna.cmd(":VNA:STIM:LVL -10")
         await self.vna.cmd(":VNA:ACQ:IFBW 10000")
