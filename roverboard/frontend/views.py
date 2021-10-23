@@ -35,7 +35,7 @@ def download_file(request,filename):
 class RoverForm(forms.Form):
     distance = forms.FloatField()
     pattern = forms.ChoiceField(choices=(('square','square'),('line','line')))
-    record_gpr = forms.BooleanField()
+    record_gpr = forms.BooleanField(required=False)
 
     def send_req(self):
         data = self.cleaned_data
@@ -87,4 +87,5 @@ class ScanListView(FormView):
         #context['latest_articles'] = Article.objects.all()[:5]
         if self.request.GET.get('cancel'):
             requests.get('http://{}/cancel'.format(settings.ROBOT_API_ADDRESS))
+        # import pdb; pdb.set_trace()
         return context

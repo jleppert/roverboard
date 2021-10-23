@@ -449,6 +449,20 @@
 					<div class="card">
 													<div class="card-header">
 														<h5 class="card-title">Scan Now!</h5>
+														{% if form.errors %}
+													{% for field in form %}
+															{% for error in field.errors %}
+																	<div class="alert alert-danger">
+																			<strong>{{field.name}}: {{ error|escape }}</strong>
+																	</div>
+															{% endfor %}
+													{% endfor %}
+													{% for error in form.non_field_errors %}
+															<div class="alert alert-danger">
+																	<strong>{{ error|escape }}</strong>
+															</div>
+													{% endfor %}
+													{% endif %}
 														<!-- <h6 class="card-subtitle text-muted">Single horizontal row.</h6> -->
 													</div>
 													<div class="card-body">
@@ -518,6 +532,7 @@
 								<div class="card-header">
 									<h3 class="card-title">Your scans</h3>
 									<h6 class="card-subtitle text-muted">These are your most recent scans. You may click on a scan to see details</h6>
+
 								</div>
 								<div class="card-body">
 									<table id="datatables-reponsive" class="table table-striped" style="width:100%">
