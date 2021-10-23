@@ -28,7 +28,7 @@ class AsyncTCP(object):
             await asyncio.sleep(0.1)
 
 
-    async def __read_response(self):
+    async def read_response(self):
         data = await self.reader.readline()
         return data.decode().rstrip()
 
@@ -36,7 +36,7 @@ class RAWVNA(AsyncTCP):
 
     async def read_trace(self):
         ret = []
-        data = await self.__read_response()
+        data = await self.read_response()
         samples = data.split(';')
 
         for s in samples:
@@ -51,12 +51,12 @@ class libreVNA(AsyncTCP):
     async def cmd(self, cmd):
         self.writer.write(cmd.encode() + b"\n")
         await self.writer.drain()
-        return await self.__read_response()
+        return await self.read_response()
 
     async def query(self, query):
         self.writer.write(query.encode() + b"\n")
         await self.writer.drain()
-        return await self.__read_response()
+        return await self.read_response()
 
     @staticmethod
     def parse_trace_data(data):
