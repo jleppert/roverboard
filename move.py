@@ -154,7 +154,7 @@ class RobotMove(object):
         """ starts processing GPR for specified number of seconds in another coro, which spawns a thread for TDR, returns before complete"""
 
 
-        gpr = VNAGPR(use_raw=True)
+        gpr = VNAGPR(use_raw=False)
         await gpr.run()
         name = datetime.datetime.utcnow().isoformat()
 

@@ -62,7 +62,7 @@ class VNAGPR(object):
         await self.vna.cmd(":VNA_CAL:LOAD {}".format(self.calibration))
         await self.vna.cmd(":VNA_CAL:TYPE SOLT")
         await self.vna.cmd(":VNA:SWEEP FREQUENCY")
-        await self.vna.cmd(":VNA:STIM:LVL 0")
+        await self.vna.cmd(":VNA:STIM:LVL -10")
         await self.vna.cmd(":VNA:ACQ:IFBW 10000")
         await self.vna.cmd(":VNA:ACQ:AVG 1")
         await self.vna.cmd(":VNA:ACQ:POINTS 303")
