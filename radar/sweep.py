@@ -30,6 +30,7 @@ class VNAGPR(object):
     async def connect(self):
         if self.use_raw:
             self.vna = RAWVNA('localhost', 6969)
+            await self.vna.connect()
         else:
             # Create the control instance
 
