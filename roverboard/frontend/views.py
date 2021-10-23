@@ -26,7 +26,7 @@ def download_file(request,filename):
         return
 
     path = os.path.join(settings.SCAN_DATA_DIR, filename+'o')
-    fl = open(path, 'r')
+    fl = open(path, 'rb')
     response = HttpResponse(fl, content_type='application/force-download')
     download_name = '{}.DZT'.format(filename)
     response['Content-Disposition'] = "attachment; filename=%s" % download_name
