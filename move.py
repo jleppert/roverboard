@@ -142,22 +142,21 @@ class RobotMove(object):
         except:
             logger.exception("Failed post proccessing job ")
 
+    @staticmethod
+    async def write_gpr_data(gpr, name, seconds):
+        """ starts recording existing GPR session and converts TDR when complete in a thread"""
+        await gpr.writedata(name, seconds)
+        return loop.run_in_executor(None, self.write_tdr, name)
+
     async def record_gpr(self, seconds):
-        """ starts processing GPR for specified number of seconds in another thread, returns before complete"""
+        """ starts processing GPR for specified number of seconds in another coro, which spawns a thread for TDR, returns before complete"""
         loop = asyncio.get_event_loop()
 
         gpr = VNAGPR()
-        gpr.run()
+        await gpr.run()
         name = datetime.datetime.utcnow().isoformat()
 
-
-
-        def writedata(name, seconds):
-            gpr.writedata(name, seconds)
-            self.write_tdr(name)
-            #self.process_executor.submit(self.write_tdr, name)
-
-        task = loop.run_in_executor(None, writedata, name, seconds)
+        task = asyncio.ensure_future(self.write_gpr_data(gpr, name, seconds))
         return task
 
 
