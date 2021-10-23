@@ -5,10 +5,10 @@ import concurrent.futures
 import time
 import csv
 try:
-    from .libreVNA import libreVNA
+    from .libreVNA import libreVNA, RAWVNA
     from .tdr import TDR
 except:
-    from libreVNA import libreVNA
+    from libreVNA import libreVNA, RAWVNA
     from tdr import TDR
 
 import datetime
@@ -24,28 +24,35 @@ class VNAGPR(object):
 
     vna = None
 
-    def __init__(self):
-        pass
+    def __init__(self, use_raw=False):
+        self.use_raw = use_raw
 
     async def connect(self):
-        # Create the control instance
-
-        self.vna = libreVNA('localhost', 19542)
-        await self.vna.connect()
-
-        # Quick connection check (should print "LibreVNA-GUI")
-        print(await self.vna.query("*IDN?"))
-
-        # Make sure we are connecting to a device (just to be sure, with default settings the LibreVNA-GUI auto-connects)
-        await self.vna.cmd(":DEV:CONN")
-        dev = await self.vna.query(":DEV:CONN?")
-        if dev == "Not connected":
-            print("Not connected to any device, aborting")
-            exit(-1)
+        if self.use_raw:
+            self.vna = RAWVNA('localhost', 6969)
         else:
-            print("Connected to "+dev)
+            # Create the control instance
+
+            self.vna = libreVNA('localhost', 19542)
+            await self.vna.connect()
+
+            # Quick connection check (should print "LibreVNA-GUI")
+            print(await self.vna.query("*IDN?"))
+
+            # Make sure we are connecting to a device (just to be sure, with default settings the LibreVNA-GUI auto-connects)
+            await self.vna.cmd(":DEV:CONN")
+            dev = await self.vna.query(":DEV:CONN?")
+            if dev == "Not connected":
+                print("Not connected to any device, aborting")
+                exit(-1)
+            else:
+                print("Connected to "+dev)
+
 
     async def scan(self):
+        if self.use_raw:
+            """ todo impliment scan / setup on RAW"""
+            return
         # Simple trace data extraction
 
         # switch to VNA mode, setup the sweep parameters
@@ -96,11 +103,14 @@ class VNAGPR(object):
 
             while True:
                 start = datetime.datetime.utcnow()
-                data = await self.vna.query(":VNA:TRACE:DATA? S21")
+                if self.use_raw:
+                    S21 = await self.vna.read_trace()
+                else:
+                    data = await self.vna.query(":VNA:TRACE:DATA? S21")
+                    S21 = self.vna.parse_trace_data(data)
                 end = datetime.datetime.utcnow()
                 total_seconds = (end - start).total_seconds()
                 print("took {} seconds".format(total_seconds))
-                S21 = self.vna.parse_trace_data(data)
                 print(output)
 
                 def write_file():
@@ -142,12 +152,15 @@ def main():
 
     parser.add_argument("-p", "--pipeline",  action="store_true",
                     help="run tdr  pipeline ( only works with time set)")
+    parser.add_argument("-r", "--raw",  action="store_true",
+                    help="Use RAWVNA protocol")
+
 
     args = parser.parse_args()
     output = args.output
 
     try:
-        GPR = VNAGPR()
+        GPR = VNAGPR(use_raw=args.raw)
         asyncio.set_event_loop(asyncio.new_event_loop())
         loop = asyncio.get_event_loop()
         loop.run_until_complete(GPR.writedata(args.output, args.time))

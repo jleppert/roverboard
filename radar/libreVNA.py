@@ -6,7 +6,7 @@ import asyncio
 logger = logging.getLogger(__name__)
 
 
-class libreVNA:
+class AsyncTCP(object):
     def __init__(self, host='localhost', port=19542):
         self.host = host
         self.port = port
@@ -31,6 +31,22 @@ class libreVNA:
     async def __read_response(self):
         data = await self.reader.readline()
         return data.decode().rstrip()
+
+class RAWVNA(AsyncTCP):
+
+    async def read_trace(self):
+        ret = []
+        data = await self.__read_response()
+        samples = data.split(';')
+
+        for s in samples:
+            freq, real, imag = s.split(',')
+            ret.append(freq,complex(real,imag))
+        return ret
+
+
+class libreVNA(AsyncTCP):
+
 
     async def cmd(self, cmd):
         self.writer.write(cmd.encode() + b"\n")
