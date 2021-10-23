@@ -40,6 +40,8 @@ class RAWVNA(AsyncTCP):
         samples = data.split(';')
 
         for s in samples:
+            if not len(s):
+                continue
             freq, real, imag = s.split(',')
             ret.append((freq,complex(float(real),float(imag))))
         return ret
