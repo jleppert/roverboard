@@ -444,10 +444,11 @@
 
 			<main class="content">
 				<div class="container-fluid p-0">
-					<div class="col-md-12">
+					<div class="row">
+					<div class="col-md-8">
 					<div class="card">
 													<div class="card-header">
-														<h5 class="card-title">Rover Control</h5>
+														<h5 class="card-title">Scan Now!</h5>
 														<!-- <h6 class="card-subtitle text-muted">Single horizontal row.</h6> -->
 													</div>
 													<div class="card-body">
@@ -463,8 +464,8 @@
 																<label class="form-label" for="inlineFormInputGroupUsername2">Scan Type</label>
 																<div class="input-group mb-2 mr-sm-2">
 																	<select class="form-control" id="inlineFormInputGroupUsername2" value="square" name="pattern">
-																		<option selected>square</option>
-																		<option>line</option>
+																		<option>square</option>
+																		<option selected>line</option>
 
 
 																	</select>
@@ -487,6 +488,30 @@
 													</div>
 												</div>
 					</div>
+
+
+					<div class="col-md-4">
+					<div class="card">
+													<div class="card-header">
+														<h5 class="card-title">Rover Control</h5>
+														<!-- <h6 class="card-subtitle text-muted">Single horizontal row.</h6> -->
+													</div>
+													<div class="card-body">
+														<div class="row row-cols-md-auto align-items-center" method="POST">
+															{% csrf_token %}
+
+															<div class="col-12">
+																<form method="GET">
+																<input type="hidden" name="cancel" value="1" />
+																<button type="submit" class="btn btn-danger"><i class="fas fa-times"></i> Cancel Action</button>
+															</form>
+															</div>
+
+														</div>
+													</div>
+												</div>
+					</div>
+				</div>
 					<div class="row">
 						<div class="col-12">
 							<div class="card">
@@ -565,7 +590,9 @@
 		document.addEventListener("DOMContentLoaded", function() {
 			// Datatables Responsive
 			$("#datatables-reponsive").DataTable({
-				responsive: true
+				responsive: true,
+				"order": [[ 1, "desc" ]]
+
 			});
 		});
 	</script>

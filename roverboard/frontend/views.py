@@ -40,7 +40,7 @@ class RoverForm(forms.Form):
     def send_req(self):
         data = self.cleaned_data
 
-        requests.get('http://192.168.4.69:9005/start', params=data)
+        requests.get('http://{}/start'.format(settings.ROBOT_API_ADDRESS), params=data)
         #return response.json()
 
 
@@ -85,4 +85,6 @@ class ScanListView(FormView):
         context = super().get_context_data(**kwargs)
         context['scan_data'] = self._get_scans()
         #context['latest_articles'] = Article.objects.all()[:5]
+        if self.request.GET.get('cancel'):
+            requests.get('http://{}/cancel'.format(settings.ROBOT_API_ADDRESS))
         return context

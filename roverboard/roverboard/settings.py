@@ -133,3 +133,5 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SCAN_DATA_DIR= os.environ.get('SCAN_DATA_DIR','/Users/ian/projects/dronepy/radar/data')
+
+ROBOT_API_ADDRESS = os.environ.get('ROBOT_API_ADDRESS', '127.0.0.1:9005')
