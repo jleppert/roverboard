@@ -12,7 +12,7 @@ import datetime
 import glob
 import os
 import requests
-
+from django.http import HttpResponse
 
 class ScanDetailView(TemplateView):
     pass
