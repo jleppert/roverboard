@@ -147,7 +147,7 @@ def main():
     output = args.output
 
     try:
-        GPR = VNAGPRA()
+        GPR = VNAGPR()
         asyncio.set_event_loop(asyncio.new_event_loop())
         loop = asyncio.get_event_loop()
         loop.run_until_complete(GPR.writedata(args.output, args.time))
