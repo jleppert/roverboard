@@ -105,13 +105,17 @@ class VNAGPR(object):
             while True:
                 start = datetime.datetime.utcnow()
                 if self.use_raw:
-                    S21 = await self.vna.read_trace()
+                    data = await self.vna.read_trace()
                 else:
                     data = await self.vna.query(":VNA:TRACE:DATA? S21")
-                    S21 = self.vna.parse_trace_data(data)
+
                 end = datetime.datetime.utcnow()
                 total_seconds = (end - start).total_seconds()
                 print("took {} seconds".format(total_seconds))
+                if self.use_raw:
+                    S21 = await self.vna.read_trace()
+                else:
+                    S21 = self.vna.parse_trace_data(data)
                 print(output)
 
                 def write_file():

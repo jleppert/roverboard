@@ -35,10 +35,13 @@ class AsyncTCP(object):
 class RAWVNA(AsyncTCP):
 
     async def read_trace(self):
-        ret = []
         data = await self.read_response()
-        samples = data.split(';')
+        return data
 
+    @staticmethod
+    def parse_trace_data(data):
+        ret = []
+        samples = data.split(';')
         for s in samples:
             if not s.strip():
                 continue
@@ -47,7 +50,6 @@ class RAWVNA(AsyncTCP):
             freq, real, imag = split_line
             ret.append((freq,complex(float(real),float(imag))))
         return ret
-
 
 class libreVNA(AsyncTCP):
 
