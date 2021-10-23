@@ -20,11 +20,13 @@ from django.urls import include, path
 
 from django.conf import settings
 
-from frontend.views import ScanListView
+from frontend.views import ScanListView, download_file
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', ScanListView.as_view(), name='home'),
+    path('download/<str:filename>', download_file),
+
 ]
 
 if settings.DEBUG:

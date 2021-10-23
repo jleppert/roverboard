@@ -3,6 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 
 
+import mimetypes
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from django import forms
@@ -11,6 +12,25 @@ import datetime
 import glob
 import os
 import requests
+
+
+class ScanDetailView(TemplateView):
+    pass
+
+def download_file(request,filename):
+    # fill these variables with real values
+
+
+    if '/' in filename or '..' in filename:
+        #don't allow these characters to move directories
+        return
+
+    path = os.path.join(settings.SCAN_DATA_DIR, filename+'o')
+    fl = open(path, 'r')
+    response = HttpResponse(fl, mimetype='application/force-download')
+    download_name = '{}.DZT'.format(filename)
+    response['Content-Disposition'] = "attachment; filename=%s" % download_name
+    return response
 
 class RoverForm(forms.Form):
     distance = forms.FloatField()
@@ -48,7 +68,7 @@ class ScanListView(FormView):
             if d == 'None':
                 continue
             scan_path = os.path.join(settings.SCAN_DATA_DIR, d)
-            result_path = os.path.join(settings.SCAN_DATA_DIR, d+'.DZT')
+            result_path = os.path.join(settings.SCAN_DATA_DIR, d+'o')
 
             try:
                 ts = datetime.datetime.strptime(d,"%Y-%m-%dT%H:%M:%S.%f")

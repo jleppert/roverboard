@@ -502,12 +502,13 @@
 												<th>Date</th>
 												<th>Number of Samples</th>
 												<th>Is Processed</th>
+
 											</tr>
 										</thead>
 										<tbody>
 											{% for name, data in scan_data.items %}
 											<tr>
-												<td>{{name}} </td>
+												<td><a href="/download/{{name}}"> {{name}}</a> </td>
 													<td>{{data.date}}</td>
 													<td>{{data.samples}}</td>
 													<td>{% if data.is_processed %}
