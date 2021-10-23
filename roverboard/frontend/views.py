@@ -39,6 +39,9 @@ class RoverForm(forms.Form):
 
     def send_req(self):
         data = self.cleaned_data
+        if not bool(data.get('record_gpr')):
+            if 'record_gpr' in data:
+                del data['record_gpr']
 
         requests.get('http://{}/start'.format(settings.ROBOT_API_ADDRESS), params=data)
         #return response.json()
