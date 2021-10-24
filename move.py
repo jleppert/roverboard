@@ -230,7 +230,7 @@ class RobotMove(object):
 
                 await self.send_command("command")
                 await self.send_command("chassis push freq 10")
-                await self.send_command("stream on")
+                #await self.send_command("stream on")
                 await self._get_position(read_socket=self.ctrl_reader, write_socket=self.ctrl_writer)
 
                 #This is the full Scan of the square
