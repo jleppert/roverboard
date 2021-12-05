@@ -67,9 +67,12 @@ class RobotServer(object):
         await self.http_runner.setup()
         print("ran http setup")
         try:
+            print("starting site...")
             self.http_site = aiohttp.web.TCPSite(self.http_runner,
                     self.http_address, self.http_port, reuse_address=True)
             await self.http_site.start()
+
+            print("balh")
             try:
                 await self.setup()
             except Exception as e:

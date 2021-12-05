@@ -1,5 +1,5 @@
 import socket
-host = "127.0.0.1"
+host = "192.168.42.2"
 port = 40923
 
 def main():
